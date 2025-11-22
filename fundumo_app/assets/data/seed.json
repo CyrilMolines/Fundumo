@@ -1,0 +1,88 @@
+{
+  "userProfile": {
+    "name": "Alex Rivera",
+    "currency": "USD",
+    "monthlyTakeHome": 5200,
+    "notificationEmail": "alex@fundumo.app"
+  },
+  "fixedExpenses": [
+    {"name": "Rent", "amount": 2200, "frequency": "monthly", "nextDue": "2025-12-01"},
+    {"name": "Utilities", "amount": 260, "frequency": "monthly", "nextDue": "2025-11-28"},
+    {"name": "Insurance", "amount": 1200, "frequency": "yearly", "nextDue": "2026-03-20"},
+    {"name": "Student Loan", "amount": 350, "frequency": "monthly", "nextDue": "2025-12-05"}
+  ],
+  "subscriptions": [
+    {"name": "Spotify", "amount": 10.99, "frequency": "monthly", "nextRenewal": "2025-11-18", "category": "Entertainment"},
+    {"name": "Adobe Creative Cloud", "amount": 54.99, "frequency": "monthly", "nextRenewal": "2025-11-27", "category": "Work"},
+    {"name": "Notion", "amount": 96, "frequency": "yearly", "nextRenewal": "2026-01-05", "category": "Productivity"},
+    {"name": "Gym Membership", "amount": 45, "frequency": "monthly", "nextRenewal": "2025-11-30", "category": "Health"},
+    {"name": "Apple iCloud", "amount": 9.99, "frequency": "monthly", "nextRenewal": "2025-11-20", "category": "Storage"}
+  ],
+  "envelopes": [
+    {"id": "env-food", "name": "Food & Groceries", "allocation": 650, "rollover": false, "color": "#9b2226"},
+    {"id": "env-transport", "name": "Transport", "allocation": 180, "rollover": true, "color": "#bb3e03"},
+    {"id": "env-fun", "name": "Fun", "allocation": 220, "rollover": false, "color": "#0a9396"},
+    {"id": "env-health", "name": "Health", "allocation": 150, "rollover": true, "color": "#005f73"},
+    {"id": "env-giving", "name": "Giving", "allocation": 120, "rollover": false, "color": "#ae2012"}
+  ],
+  "transactions": [
+    {"id": "tx1", "envelopeId": "env-food", "amount": 68.4, "timestamp": "2025-11-02T13:12:00Z", "notes": "Weekly groceries"},
+    {"id": "tx2", "envelopeId": "env-transport", "amount": 42.2, "timestamp": "2025-11-03T08:30:00Z", "notes": "Gas fill-up"},
+    {"id": "tx3", "envelopeId": "env-fun", "amount": 38.5, "timestamp": "2025-11-04T21:00:00Z", "notes": "Movie night"},
+    {"id": "tx4", "envelopeId": "env-food", "amount": 25.1, "timestamp": "2025-11-06T12:15:00Z", "notes": "Lunch with client"},
+    {"id": "tx5", "envelopeId": "env-giving", "amount": 50, "timestamp": "2025-11-10T10:00:00Z", "notes": "Donation"},
+    {"id": "tx6", "envelopeId": "env-health", "amount": 28.75, "timestamp": "2025-11-11T16:00:00Z", "notes": "Pharmacy"},
+    {"id": "tx7", "envelopeId": "env-transport", "amount": 18.9, "timestamp": "2025-11-12T07:45:00Z", "notes": "Metro reload"},
+    {"id": "tx8", "envelopeId": "env-fun", "amount": 62, "timestamp": "2025-11-13T20:30:00Z", "notes": "Concert tickets"},
+    {"id": "tx9", "envelopeId": "env-food", "amount": 71.35, "timestamp": "2025-11-13T18:05:00Z", "notes": "Groceries"},
+    {"id": "tx10", "envelopeId": "env-food", "amount": 16.8, "timestamp": "2025-11-13T12:42:00Z", "notes": "Quick lunch"}
+  ],
+  "sideGigs": [
+    {"id": "gig-design", "name": "Logo Design", "hourlyRate": 55, "taxRate": 0.25, "entries": [
+      {"date": "2025-11-04", "hours": 3.5, "income": 220, "expenses": 12},
+      {"date": "2025-11-07", "hours": 2, "income": 110, "expenses": 0},
+      {"date": "2025-11-12", "hours": 4.5, "income": 260, "expenses": 18}
+    ]},
+    {"id": "gig-tutoring", "name": "STEM Tutoring", "hourlyRate": 40, "taxRate": 0.22, "entries": [
+      {"date": "2025-11-01", "hours": 2, "income": 80, "expenses": 0},
+      {"date": "2025-11-05", "hours": 1.5, "income": 60, "expenses": 5},
+      {"date": "2025-11-09", "hours": 2.5, "income": 100, "expenses": 0},
+      {"date": "2025-11-13", "hours": 2, "income": 80, "expenses": 0}
+    ]}
+  ],
+  "savingGoals": [
+    {"id": "goal-trip", "name": "Japan Rail Pass", "targetAmount": 1800, "targetDate": "2026-05-15", "theme": "travel", "contributions": [
+      {"date": "2025-09-01", "amount": 200},
+      {"date": "2025-10-01", "amount": 220},
+      {"date": "2025-11-01", "amount": 250}
+    ]},
+    {"id": "goal-emergency", "name": "Emergency Fund", "targetAmount": 10000, "targetDate": "2026-12-31", "theme": "safety", "contributions": [
+      {"date": "2025-08-15", "amount": 500},
+      {"date": "2025-09-15", "amount": 500},
+      {"date": "2025-10-15", "amount": 500},
+      {"date": "2025-11-10", "amount": 500}
+    ]}
+  ],
+  "sharedBills": [
+    {"id": "sb-flat", "name": "Loft Flatmates", "participants": [
+      {"id": "alex", "name": "Alex", "weight": 1.2},
+      {"id": "sam", "name": "Sam", "weight": 1},
+      {"id": "jordan", "name": "Jordan", "weight": 0.8}
+    ],
+    "expenses": [
+      {"id": "sbe1", "title": "Groceries run", "amount": 120.3, "paidBy": "alex", "date": "2025-11-05", "split": "equal"},
+      {"id": "sbe2", "title": "Electric bill", "amount": 86.4, "paidBy": "sam", "date": "2025-11-08", "split": "weighted"},
+      {"id": "sbe3", "title": "Streaming services", "amount": 42, "paidBy": "jordan", "date": "2025-11-09", "split": "equal"}
+    ],
+    "settlements": [
+      {"from": "sam", "to": "alex", "amount": 30.1, "date": "2025-11-10"},
+      {"from": "jordan", "to": "sam", "amount": 20, "date": "2025-11-12"}
+    ]}
+  ],
+  "receipts": [
+    {"id": "receipt-laptop", "title": "Framework Laptop", "category": "Electronics", "purchaseDate": "2024-05-20", "warrantyExpiry": "2026-05-20", "image": null},
+    {"id": "receipt-microwave", "title": "Kitchen Microwave", "category": "Appliances", "purchaseDate": "2023-12-18", "warrantyExpiry": "2025-12-18", "image": null},
+    {"id": "receipt-chair", "title": "Ergonomic Chair", "category": "Work", "purchaseDate": "2025-03-22", "warrantyExpiry": "2025-11-25", "image": null},
+    {"id": "receipt-headphones", "title": "Noise Cancelling Headphones", "category": "Electronics", "purchaseDate": "2024-11-02", "warrantyExpiry": "2026-11-02", "image": null}
+  ]
+}

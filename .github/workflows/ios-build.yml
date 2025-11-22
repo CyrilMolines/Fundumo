@@ -1,0 +1,103 @@
+name: iOS Build
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build type'
+        required: true
+        default: 'testflight'
+        type: choice
+        options:
+          - testflight
+          - appstore
+
+jobs:
+  build:
+    name: Build iOS App
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.9.2'
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: |
+          cd fundumo_app
+          flutter pub get
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      - name: Install Fastlane dependencies
+        run: |
+          cd fundumo_app/ios
+          bundle install
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Setup CocoaPods
+        run: |
+          cd fundumo_app/ios
+          pod install
+
+      - name: Setup Match (Code Signing)
+        env:
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+        run: |
+          cd fundumo_app/ios
+          bundle exec fastlane match appstore --readonly
+
+      - name: Build iOS App
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        run: |
+          cd fundumo_app/ios
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            BUILD_TYPE=${{ github.event.inputs.build_type }}
+          else
+            BUILD_TYPE=testflight
+          fi
+          
+          if [ "$BUILD_TYPE" == "appstore" ]; then
+            bundle exec fastlane release
+          else
+            bundle exec fastlane beta
+          fi
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build
+          path: fundumo_app/ios/build/*.ipa
+          retention-days: 30
+
+      - name: Upload to TestFlight
+        if: github.event.inputs.build_type == 'testflight' || github.event_name != 'workflow_dispatch'
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+        run: |
+          # Build is already uploaded in the beta lane
+          echo "Build uploaded to TestFlight"
+

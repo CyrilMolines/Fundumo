@@ -1,0 +1,172 @@
+# Codemagic YAML configuration for Flutter iOS/Android builds
+# This is Flutter's equivalent to EAS Build
+
+workflows:
+  ios-workflow:
+    name: iOS Workflow
+    max_build_duration: 120
+    instance_type: mac_mini_m1
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+      groups:
+        - app_store_credentials
+        - app_store_connect_api_key
+      vars:
+        SUPABASE_URL: $SUPABASE_URL
+        SUPABASE_ANON_KEY: $SUPABASE_ANON_KEY
+        SENTRY_DSN: $SENTRY_DSN
+        APP_ID: com.yourcompany.fundumo
+        BUNDLE_ID: com.yourcompany.fundumo
+    scripts:
+      - name: Get Flutter dependencies
+        script: |
+          flutter pub get
+      - name: Install CocoaPods dependencies
+        script: |
+          cd ios && pod install
+      - name: Set up code signing settings on Xcode project
+        script: |
+          xcode-project use-profiles
+      - name: Build ipa for distribution
+        script: |
+          flutter build ipa --release \
+            --dart-define=SUPABASE_URL=$SUPABASE_URL \
+            --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY \
+            --dart-define=SENTRY_DSN=$SENTRY_DSN
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - flutter_drive.log
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com
+        notify:
+          success: true
+          failure: false
+      app_store_connect:
+        auth: api_key
+        submit_to_testflight: true
+        beta_groups:
+          - group name 1
+          - group name 2
+
+  android-workflow:
+    name: Android Workflow
+    max_build_duration: 120
+    instance_type: linux_x2
+    environment:
+      flutter: stable
+      groups:
+        - keystore_credentials
+      vars:
+        SUPABASE_URL: $SUPABASE_URL
+        SUPABASE_ANON_KEY: $SUPABASE_ANON_KEY
+        SENTRY_DSN: $SENTRY_DSN
+        PACKAGE_NAME: com.yourcompany.fundumo
+    scripts:
+      - name: Get Flutter dependencies
+        script: |
+          flutter pub get
+      - name: Set up local properties
+        script: |
+          echo "flutter.sdk=$HOME/programs/flutter" > $CM_BUILD_DIR/android/local.properties
+      - name: Set up code signing
+        script: |
+          echo "storePassword=$CM_KEYSTORE_PASSWORD" > $CM_BUILD_DIR/android/key.properties
+          echo "keyPassword=$CM_KEY_PASSWORD" >> $CM_BUILD_DIR/android/key.properties
+          echo "keyAlias=$CM_KEY_ALIAS" >> $CM_BUILD_DIR/android/key.properties
+          echo "storeFile=$CM_KEYSTORE_PATH" >> $CM_BUILD_DIR/android/key.properties
+      - name: Build APK
+        script: |
+          flutter build apk --release \
+            --dart-define=SUPABASE_URL=$SUPABASE_URL \
+            --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY \
+            --dart-define=SENTRY_DSN=$SENTRY_DSN
+      - name: Build App Bundle
+        script: |
+          flutter build appbundle --release \
+            --dart-define=SUPABASE_URL=$SUPABASE_URL \
+            --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY \
+            --dart-define=SENTRY_DSN=$SENTRY_DSN
+    artifacts:
+      - build/app/outputs/flutter-apk/*.apk
+      - build/app/outputs/bundle/release/*.aab
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com
+        notify:
+          success: true
+          failure: false
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
+        submit_as_draft: false
+
+  ios-android-workflow:
+    name: iOS + Android Workflow
+    max_build_duration: 120
+    instance_type: mac_mini_m1
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+      groups:
+        - app_store_credentials
+        - app_store_connect_api_key
+        - keystore_credentials
+      vars:
+        SUPABASE_URL: $SUPABASE_URL
+        SUPABASE_ANON_KEY: $SUPABASE_ANON_KEY
+        SENTRY_DSN: $SENTRY_DSN
+        APP_ID: com.yourcompany.fundumo
+        BUNDLE_ID: com.yourcompany.fundumo
+        PACKAGE_NAME: com.yourcompany.fundumo
+    scripts:
+      - name: Get Flutter dependencies
+        script: |
+          flutter pub get
+      - name: Install CocoaPods dependencies
+        script: |
+          cd ios && pod install
+      - name: Set up code signing settings on Xcode project
+        script: |
+          xcode-project use-profiles
+      - name: Build iOS
+        script: |
+          flutter build ipa --release \
+            --dart-define=SUPABASE_URL=$SUPABASE_URL \
+            --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY \
+            --dart-define=SENTRY_DSN=$SENTRY_DSN
+      - name: Build Android
+        script: |
+          echo "storePassword=$CM_KEYSTORE_PASSWORD" > $CM_BUILD_DIR/android/key.properties
+          echo "keyPassword=$CM_KEY_PASSWORD" >> $CM_BUILD_DIR/android/key.properties
+          echo "keyAlias=$CM_KEY_ALIAS" >> $CM_BUILD_DIR/android/key.properties
+          echo "storeFile=$CM_KEYSTORE_PATH" >> $CM_BUILD_DIR/android/key.properties
+          flutter build appbundle --release \
+            --dart-define=SUPABASE_URL=$SUPABASE_URL \
+            --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY \
+            --dart-define=SENTRY_DSN=$SENTRY_DSN
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - build/app/outputs/bundle/release/*.aab
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com
+        notify:
+          success: true
+          failure: false
+      app_store_connect:
+        auth: api_key
+        submit_to_testflight: true
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
+
+
+

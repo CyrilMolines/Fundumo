@@ -1,0 +1,9 @@
+# Matchfile for code signing
+# This manages certificates and provisioning profiles
+
+git_url("https://github.com/your-org/fundumo-certificates")
+storage_mode("git")
+type("appstore") # or "development", "adhoc", "enterprise"
+app_identifier("com.yourcompany.fundumo")
+username("your-apple-id@example.com") # Your Apple ID email
+

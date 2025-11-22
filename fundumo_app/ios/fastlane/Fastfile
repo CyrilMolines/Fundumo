@@ -1,0 +1,146 @@
+# Fastfile for iOS builds
+# This is the Flutter equivalent of EAS build for iOS
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Build iOS app for development"
+  lane :build_dev do
+    # Clean build folder
+    clean_build_artifacts
+    
+    # Build Flutter app
+    sh("cd .. && flutter build ios --debug --no-codesign")
+    
+    # Build Xcode project
+    build_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      configuration: "Debug",
+      export_method: "development",
+      skip_codesigning: true,
+      output_directory: "./build",
+    )
+  end
+
+  desc "Build iOS app for ad-hoc distribution"
+  lane :build_adhoc do
+    # Clean build folder
+    clean_build_artifacts
+    
+    # Build Flutter app
+    sh("cd .. && flutter build ios --release --no-codesign")
+    
+    # Build Xcode project
+    build_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      configuration: "Release",
+      export_method: "ad-hoc",
+      output_directory: "./build",
+    )
+  end
+
+  desc "Build iOS app for App Store"
+  lane :build_appstore do
+    # Clean build folder
+    clean_build_artifacts
+    
+    # Build Flutter app
+    sh("cd .. && flutter build ios --release --no-codesign")
+    
+    # Build Xcode project
+    build_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: "./build",
+    )
+  end
+
+  desc "Build and upload to TestFlight"
+  lane :beta do
+    # Increment build number
+    increment_build_number(
+      xcodeproj: "Runner.xcodeproj"
+    )
+    
+    # Build Flutter app
+    sh("cd .. && flutter build ios --release --no-codesign")
+    
+    # Build and upload to TestFlight
+    build_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: "./build",
+    )
+    
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true,
+      skip_submission: true,
+    )
+  end
+
+  desc "Build and upload to App Store"
+  lane :release do
+    # Increment version
+    increment_version_number(
+      xcodeproj: "Runner.xcodeproj",
+      version_number: ENV["VERSION_NUMBER"] || get_version_number(xcodeproj: "Runner.xcodeproj")
+    )
+    
+    # Increment build number
+    increment_build_number(
+      xcodeproj: "Runner.xcodeproj"
+    )
+    
+    # Build Flutter app
+    sh("cd .. && flutter build ios --release --no-codesign")
+    
+    # Build and upload to App Store
+    build_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: "./build",
+    )
+    
+    upload_to_app_store(
+      force: true,
+      submit_for_review: false,
+      automatic_release: false,
+    )
+  end
+
+  desc "Run tests"
+  lane :test do
+    # Run Flutter tests
+    sh("cd .. && flutter test")
+    
+    # Run iOS tests (if any)
+    run_tests(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      device: "iPhone 15",
+    )
+  end
+
+  desc "Setup certificates and provisioning profiles"
+  lane :setup do
+    match(
+      type: "appstore",
+      readonly: true,
+    )
+  end
+
+  desc "Clean build artifacts"
+  lane :clean do
+    clean_build_artifacts
+    sh("cd .. && flutter clean")
+  end
+end
+

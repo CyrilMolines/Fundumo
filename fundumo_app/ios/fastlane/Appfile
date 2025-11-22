@@ -1,0 +1,10 @@
+# Appfile for Fastlane
+# Configuration for your app
+
+app_identifier("com.yourcompany.fundumo") # Bundle identifier
+apple_id("your-apple-id@example.com") # Your Apple ID
+team_id("YOUR_TEAM_ID") # Your Apple Developer Team ID
+
+# Optional: Specify which Xcode to use
+# xcode_select("/Applications/Xcode.app")
+
