@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -40,13 +41,21 @@ Future<void> _runApp() async {
 
       final supabase = Supabase.instance.client;
 
-      // Initialize notification service
-      final notificationService = LocalNotificationService();
-      await notificationService.initialize();
+      // Initialize notification service (skip on web)
+      final notificationService = kIsWeb
+          ? LocalNotificationService.disabled()
+          : LocalNotificationService();
+      if (!kIsWeb) {
+        await notificationService.initialize();
+      }
 
-      // Initialize receipt scanning service
-      final receiptScanningService = ReceiptScanningService();
-      await receiptScanningService.initialize();
+      // Initialize receipt scanning service (skip on web for now)
+      final receiptScanningService = kIsWeb
+          ? ReceiptScanningService.disabled()
+          : ReceiptScanningService();
+      if (!kIsWeb) {
+        await receiptScanningService.initialize();
+      }
 
       runApp(
         ProviderScope(

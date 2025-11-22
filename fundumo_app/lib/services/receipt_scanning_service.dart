@@ -16,14 +16,22 @@ class ReceiptScanningService {
     PermissionService? permissionService,
     ImagePicker? imagePicker,
   })  : _permissionService = permissionService ?? PermissionService(),
-        _imagePicker = imagePicker ?? ImagePicker();
+        _imagePicker = imagePicker ?? ImagePicker(),
+        _isDisabled = false;
 
-  final PermissionService _permissionService;
-  final ImagePicker _imagePicker;
+  ReceiptScanningService.disabled()
+      : _permissionService = null,
+        _imagePicker = null,
+        _isDisabled = true;
+
+  final PermissionService? _permissionService;
+  final ImagePicker? _imagePicker;
+  final bool _isDisabled;
   List<CameraDescription>? _cameras;
 
   /// Initialize camera
   Future<void> initialize() async {
+    if (_isDisabled) return;
     try {
       _cameras = await availableCameras();
     } catch (e) {
@@ -40,10 +48,16 @@ class ReceiptScanningService {
 
   /// Capture image from camera
   Future<XFile?> captureImage() async {
+    if (_isDisabled || _permissionService == null || _imagePicker == null) {
+      throw ReceiptScanningException('Receipt scanning not available on this platform');
+    }
+    final permissionService = _permissionService!;
+    final imagePicker = _imagePicker!;
+    
     // Check camera permission
-    final cameraStatus = await _permissionService.checkCameraPermission();
+    final cameraStatus = await permissionService.checkCameraPermission();
     if (!cameraStatus.isGranted) {
-      final requested = await _permissionService.requestCameraPermission();
+      final requested = await permissionService.requestCameraPermission();
       if (!requested.isGranted) {
         throw ReceiptScanningException('Camera permission denied');
       }
@@ -54,7 +68,7 @@ class ReceiptScanningService {
     }
 
     try {
-      final image = await _imagePicker.pickImage(
+      final image = await imagePicker.pickImage(
         source: ImageSource.camera,
         preferredCameraDevice: CameraDevice.rear,
         imageQuality: 85,
@@ -67,19 +81,25 @@ class ReceiptScanningService {
 
   /// Pick image from gallery
   Future<XFile?> pickImageFromGallery() async {
+    if (_isDisabled || _permissionService == null || _imagePicker == null) {
+      throw ReceiptScanningException('Receipt scanning not available on this platform');
+    }
+    final permissionService = _permissionService!;
+    final imagePicker = _imagePicker!;
+    
     // Check storage permission
-    final hasPermission = await _permissionService.checkStoragePermission();
+    final hasPermission = await permissionService.checkStoragePermission();
     if (!hasPermission) {
-      await _permissionService.requestStoragePermission();
+      await permissionService.requestStoragePermission();
       final hasPermissionAfterRequest =
-          await _permissionService.checkStoragePermission();
+          await permissionService.checkStoragePermission();
       if (!hasPermissionAfterRequest) {
         throw ReceiptScanningException('Storage permission denied');
       }
     }
 
     try {
-      final image = await _imagePicker.pickImage(
+      final image = await imagePicker.pickImage(
         source: ImageSource.gallery,
         imageQuality: 85,
       );
