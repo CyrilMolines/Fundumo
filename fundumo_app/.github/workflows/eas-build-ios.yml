@@ -1,0 +1,78 @@
+name: EAS Build iOS
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: 'Build profile'
+        required: false
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - preview
+      submit:
+        description: 'Submit to TestFlight after build'
+        required: false
+        default: 'true'
+        type: boolean
+
+jobs:
+  build-and-deploy:
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        working-directory: fundumo_app
+        run: flutter pub get
+
+      - name: Install CocoaPods dependencies
+        working-directory: fundumo_app/ios
+        run: pod install
+
+      - name: Set up Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Set up App Store Connect API key
+        run: |
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "${{ secrets.APP_STORE_CONNECT_API_KEY }}" > ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8
+          chmod 600 ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8
+
+      - name: Build iOS IPA
+        working-directory: fundumo_app
+        run: |
+          flutter build ipa --release
+          IPA_PATH=$(find build/ios/ipa -name "*.ipa" | head -n 1)
+          echo "ipa_path=$IPA_PATH" >> $GITHUB_OUTPUT
+          echo "✅ Build complete: $IPA_PATH"
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa-${{ github.run_number }}
+          path: fundumo_app/build/ios/ipa/*.ipa
+          retention-days: 30
+
+      - name: Submit to TestFlight
+        if: ${{ github.event.inputs.submit == 'true' }}
+        uses: apple-actions/upload-testflight-build@v1
+        with:
+          app-path: fundumo_app/build/ios/ipa/*.ipa
+          issuer-id: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          api-key-id: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          api-private-key: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+          skip-waiting-for-build-processing: true
+
