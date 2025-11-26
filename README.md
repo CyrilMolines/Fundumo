@@ -2,6 +2,8 @@
 
 **Fundumo** is a comprehensive personal finance companion app built with Flutter. Manage your budget, track subscriptions, organize envelopes, monitor side gigs, set saving goals, split shared bills, and scan receipts - all in one beautiful, intuitive interface.
 
+> **New:** The roadmap features (Event Summary Maker, Memory Lane, Anonymous Feedback) now have a dedicated Expo implementation under `fundumo_expo/` for teams that prefer Expo.dev + EAS Build. See [Expo Quick Start](#expo-quick-start) for details.
+
 ## ✨ Features
 
 ### 📊 Dashboard
@@ -104,6 +106,24 @@ See [EAS_BUILD_GUIDE.md](EAS_BUILD_GUIDE.md) for Fastlane setup.
 ### GitHub Actions
 
 Automated builds are configured in `.github/workflows/ios-build.yml`.
+
+## ⚡ Expo Quick Start
+
+If you want to work with the Expo port instead of Flutter:
+
+```bash
+cd Fundumo/fundumo_expo
+npm install
+npx expo start
+```
+
+Key docs:
+
+- [`fundumo_expo/README.md`](fundumo_expo/README.md) – feature overview + local workflow
+- [`EAS_EXPO_SETUP.md`](EAS_EXPO_SETUP.md) – linking the Expo project to EAS, credentials, CI
+- `.github/workflows/eas-build.yml` – runs lint + `eas build --profile preview`
+
+Expo supports the new Event Summary, Memory Lane, and Anonymous Feedback features with Zustand + AsyncStorage persistence and is ready for EAS preview/staging/production profiles.
 
 ## 🏗️ Architecture
 

@@ -1,0 +1,50 @@
+name: Expo EAS Build (preview)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "fundumo_expo/**"
+      - ".github/workflows/eas-build.yml"
+
+jobs:
+  eas-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: fundumo_expo
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      EAS_PROJECT_ID: ${{ secrets.EAS_PROJECT_ID }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+          cache-dependency-path: fundumo_expo/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
+
+      - name: Expo whoami
+        run: eas whoami
+
+      - name: Run EAS preview build (iOS & Android)
+        run: >
+          eas build
+          --profile preview
+          --platform all
+          --non-interactive
+
